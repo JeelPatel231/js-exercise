@@ -89,7 +89,11 @@ function returnBook(isbn) {
 }
 
 function findBooksByAuthor(author) {
-  return library.filter(x => x.author === author)
+  if (typeof author !== "string") {
+    throw new Error("Author must be string")
+  }
+
+  return library.filter(x => x.author.toLowerCase() === author.toLowerCase())
 }
 
 
@@ -128,6 +132,12 @@ describe("Library Management", () => {
       createBook("1", "2", '')
     })
   })
+
+  it("Fail on non-string author argument", () => {
+    assert.throws(() => {
+      findBooksByAuthor(1)
+    })
+  });
 
   it("Get book by author", () => {
     const bookMock = createBook("TS > JS", "Jeel", "mockisbn")

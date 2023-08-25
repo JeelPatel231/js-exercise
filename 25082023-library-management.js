@@ -21,11 +21,12 @@ const library = [
 
 class Utils {
   static nullIfEmpty(str) {
-    if (str === '' || str == null) {
+    const trimmedStr = str?.trim();
+    if (trimmedStr == null || trimmedStr == '') {
       return null
     }
 
-    return str
+    return trimmedStr
   }
 
   static notNull(data) {

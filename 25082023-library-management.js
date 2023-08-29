@@ -174,14 +174,17 @@ function rateBook(isbn, rating, userId) {
   book.ratings.set(userId, rating)
 }
 
+function getAverage(iterator) {
+  const arr = Array.from(iterator.values())
+  return arr.reduce((a, b) => a + b, 0) / arr.length
+}
+
 function getAverageRating(isbn) {
   const book = getBookByISBN(isbn)
   if (book === undefined) {
     throw new Error("Book doesnt exist in library!")
   }
-
-  const sum = Array.from(book.ratings.values()).reduce((a, b) => a + b, 0)
-  return sum / book.ratings.size
+  return getAverage(book.ratings)
 }
 
 
@@ -196,6 +199,38 @@ function searchBooks(partialAuthorOrName) {
     return x.author.toLowerCase().includes(query.toLowerCase())
       || x.title.toLowerCase().includes(query.toLowerCase())
   })
+}
+
+function sortLibrary({ title, author, rating, checkouts, dueDate, descending }) {
+  // TODO, implement multi dimensional sorting
+  // convert all to boolean
+  title = !!title
+  author = !!author
+  rating = !!rating
+  checkouts = !!checkouts
+  dueDate = !!dueDate
+
+  const factor = descending ? 1 : -1
+  /// 
+  if (title) {
+    library.sort((a, b) => a.title.localeCompare(b.title) * factor)
+  }
+
+  if (author) {
+    library.sort((a, b) => a.author.localeCompare(b.author) * factor)
+  }
+
+  if (rating) {
+    library.sort((a, b) => (getAverage(b.ratings) - getAverage(a.ratings)) * factor)
+  }
+
+  if (checkouts) {
+    library.sort((a, b) => (b.numOfCheckouts - a.numOfCheckouts) * factor)
+  }
+
+  if (dueDate) {
+    library.sort((a, b) => (b.dueDate - a.dueDate) * factor)
+  }
 }
 
 // -------------- //
@@ -391,6 +426,37 @@ describe("Library Management", () => {
     assert.throws(() => {
       searchBooks(" ")
     }, "Data Must not be Null")
+  })
+
+  // SORT BOOKS
+  it("Should sort books with given criterias", () => {
+    const b1 = createBook("abc", "def", "mockisbn1");
+    const b2 = createBook("bcd", "cde", "mockisbn2");
+    const b3 = createBook("cde", "bcd", "mockisbn3");
+    const b4 = createBook("def", "abc", "mockisbn4");
+
+    const baseArray = [
+      { ...b1, ...autoAddedParams, numOfCheckouts: 0 },
+      { ...b2, ...autoAddedParams, numOfCheckouts: 1 },
+      { ...b3, ...autoAddedParams, numOfCheckouts: 2 },
+      { ...b4, ...autoAddedParams, numOfCheckouts: 3 },
+    ];
+    baseArray.forEach(x => addBookToLibrary(x));
+    library.forEach((x, idx) => x.numOfCheckouts = idx)
+
+    sortLibrary({ author: true })
+    assert.deepEqual(library, baseArray)
+
+    sortLibrary({ checkouts: true })
+    assert.deepEqual(library, baseArray)
+
+    baseArray.reverse()
+
+    sortLibrary({ author: true, descending: true })
+    assert.deepEqual(library, baseArray)
+
+    sortLibrary({ author: true, descending: true })
+    assert.deepEqual(library, baseArray)
   })
 
 });

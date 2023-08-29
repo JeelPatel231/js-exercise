@@ -35,6 +35,13 @@ class Utils {
   }
 }
 
+function getBookByISBN(isbn) {
+  isbn = Utils.notNull(Utils.nullIfEmpty(isbn))
+
+  // we dont care if its undefined or defined
+  return library.find(x => x.isbn === isbn)
+}
+
 
 function createBook(title, author, isbn) {
   title = Utils.notNull(Utils.nullIfEmpty(title))
@@ -55,7 +62,7 @@ function addBookToLibrary(book) {
   const isbn = Utils.notNull(Utils.nullIfEmpty(book.isbn))
   const checkedOut = !!book.checkedOut
 
-  if (library.find(x => x.isbn === isbn) !== undefined) {
+  if (getBookByISBN(isbn) !== undefined) {
     throw new Error("Book with ISBN already exists!")
   }
 
@@ -63,7 +70,7 @@ function addBookToLibrary(book) {
 }
 
 function checkoutBook(isbn) {
-  const book = library.find(x => x.isbn === isbn)
+  const book = getBookByISBN(isbn)
 
   if (book === undefined) {
     throw new Error("Book does not exist in library")
@@ -77,7 +84,7 @@ function checkoutBook(isbn) {
 }
 
 function returnBook(isbn) {
-  const book = library.find(x => x.isbn === isbn)
+  const book = getBookByISBN(isbn)
 
   if (book === undefined) {
     throw new Error("Book not available in library")

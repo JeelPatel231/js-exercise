@@ -1,4 +1,4 @@
-const library = [
+let library = [
   {
     title: "To Kill a Mockingbird",
     author: "Harper Lee",
@@ -233,6 +233,31 @@ function sortLibrary({ title, author, rating, checkouts, dueDate, descending }) 
   }
 }
 
+// should be private in real world
+// storage agnostic save/load functions
+function _saveToStorage(storage) {
+  storage.setItem("library", JSON.stringify(library))
+}
+
+function _loadFromStorage(storage) {
+  try {
+    library = JSON.parse(storage.getItem("library"))
+  } catch (e) {
+    console.error(e, "Failed to Load Library from localstorage. The library is reset")
+    storage.setItem("library", JSON.stringify([]))
+  }
+}
+
+// public storage options
+function saveLibrary() {
+  _saveToStorage(window.localStorage)
+}
+
+function loadLibrary() {
+  _loadFromStorage(window.localStorage)
+}
+
+
 // -------------- //
 // MOCHA TEST CASES
 describe("Library Management", () => {
@@ -459,5 +484,40 @@ describe("Library Management", () => {
     assert.deepEqual(library, baseArray)
   })
 
+  // advanced storage
+  it("should save in localStorage", () => {
+    let localStorageMock = storageMock();
+    addBookToLibrary(createBook("abc", "def", "mockisbn1"));
+
+    let stringValue = JSON.stringify(library)
+    _saveToStorage(localStorageMock)
+    assert.equal(localStorageMock.getItem("library"), stringValue)
+    _loadFromStorage(localStorageMock)
+
+    assert.deepEqual(library, JSON.parse(stringValue))
+
+  })
 });
 
+function storageMock() {
+  let storage = {};
+
+  return {
+    setItem: function(key, value) {
+      storage[key] = value ?? '';
+    },
+    getItem: function(key) {
+      return key in storage ? storage[key] : null;
+    },
+    removeItem: function(key) {
+      delete storage[key];
+    },
+    get length() {
+      return Object.keys(storage).length;
+    },
+    key: function(i) {
+      const keys = Object.keys(storage);
+      return keys[i] || null;
+    }
+  };
+}

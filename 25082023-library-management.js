@@ -3,24 +3,38 @@ const library = [
     title: "To Kill a Mockingbird",
     author: "Harper Lee",
     isbn: "978-0-06-112008-4",
-    checkedOut: false
+    checkedOut: false,
+    numOfCheckouts: 0,
+    dueDate: null,
   },
   {
     title: "1984",
     author: "George Orwell",
     isbn: "978-0-452-28423-4",
-    checkedOut: true
+    checkedOut: true,
+    numOfCheckouts: 0,
+    dueDate: new Date()
   },
   {
     title: "Brave New World",
     author: "Aldous Huxley",
     isbn: "978-0-06-085052-4",
-    checkedOut: false
+    checkedOut: false,
+    numOfCheckouts: 0,
+    dueDate: null,
   }
 ];
 
+// maximium number of checkouts for a single book
+const MAX_CHECKOUTS = 3
+const DUE_DAY_LIMIT = 7
+
 class Utils {
   static nullIfEmpty(str) {
+    if (typeof str !== "string") {
+      throw new Error(`Data must be string, got ${str} of type ${typeof str} instead.`)
+    }
+
     const trimmedStr = str?.trim();
     if (trimmedStr == null || trimmedStr == '') {
       return null
@@ -32,6 +46,12 @@ class Utils {
   static notNull(data) {
     if (data === null) throw new Error("Data Must not be Null")
     return data
+  }
+
+  static createDueDate(date) {
+    const k = new Date()
+    k.setDate(date.getDate() + DUE_DAY_LIMIT)
+    return k
   }
 }
 
@@ -52,7 +72,6 @@ function createBook(title, author, isbn) {
     title,
     author,
     isbn,
-    checkedOut: false
   }
 }
 
@@ -60,13 +79,22 @@ function addBookToLibrary(book) {
   const title = Utils.notNull(Utils.nullIfEmpty(book.title))
   const author = Utils.notNull(Utils.nullIfEmpty(book.author))
   const isbn = Utils.notNull(Utils.nullIfEmpty(book.isbn))
-  const checkedOut = !!book.checkedOut
+
+  // Anomaly : how can a checkedout book be added to library
+  // const checkedOut = !!book.checkedOut
 
   if (getBookByISBN(isbn) !== undefined) {
     throw new Error("Book with ISBN already exists!")
   }
 
-  library.push({ title, author, isbn, checkedOut })
+  library.push({
+    title,
+    author,
+    isbn,
+    checkedOut: false,
+    numOfCheckouts: 0,
+    dueDate: null
+  })
 }
 
 function checkoutBook(isbn) {
@@ -80,7 +108,14 @@ function checkoutBook(isbn) {
     throw new Error("Book already checked out")
   }
 
+  // greater than situation should not even occur, but its a guard rail
+  if (book.numOfCheckouts >= MAX_CHECKOUTS) {
+    throw new Error("Book checkout limit reached")
+  }
+
   book.checkedOut = true
+  book.numOfCheckouts += 1
+  book.dueDate = Utils.createDueDate(new Date())
 }
 
 function returnBook(isbn) {
@@ -95,6 +130,7 @@ function returnBook(isbn) {
   }
 
   book.checkedOut = false;
+  book.dueDate = null;
 }
 
 function findBooksByAuthor(author) {
@@ -107,12 +143,20 @@ function findBooksByAuthor(author) {
   return library.filter(x => x.author.toLowerCase().includes(author.toLowerCase()))
 }
 
+// ADVANCED TASKS 1
+function listOverdueBooks() {
+  const now = Date.now()
+  return library.filter(x => x.dueDate?.getTime() <= now)
+}
+
 
 
 // -------------- //
 // MOCHA TEST CASES
 describe("Library Management", () => {
   const libraryBackup = structuredClone(library)
+
+  const autoAddedParams = { checkedOut: false, numOfCheckouts: 0, dueDate: null }
 
   beforeEach(() => {
     // truncate library
@@ -129,7 +173,11 @@ describe("Library Management", () => {
     const book1 = createBook("title1", "author1", "isbn1")
 
     // checkedOut must be false
-    assert.deepEqual(book1, { title: "title1", author: "author1", isbn: "isbn1", checkedOut: false })
+    assert.deepEqual(book1, {
+      title: "title1",
+      author: "author1",
+      isbn: "isbn1",
+    })
   })
 
   it("Fail on arbitrary parameters", () => {
@@ -147,7 +195,7 @@ describe("Library Management", () => {
   it("Test Helper function", () => {
     const bookMock = createBook("TS > JS", "Jeel", "mockisbn")
     addBookToLibrary(bookMock)
-    assert.deepEqual(bookMock, getBookByISBN(bookMock.isbn))
+    assert.deepEqual({ ...bookMock, ...autoAddedParams }, getBookByISBN(bookMock.isbn))
   })
 
   it("Fail on repeating ISBN", () => {
@@ -170,7 +218,7 @@ describe("Library Management", () => {
     addBookToLibrary(bookMock)
     const foundBook = findBooksByAuthor("Jeel").pop()
 
-    assert.deepEqual(bookMock, foundBook)
+    assert.deepEqual({ ...bookMock, ...autoAddedParams }, foundBook)
   });
 
   it("Get book by partial author name", () => {
@@ -178,7 +226,7 @@ describe("Library Management", () => {
     addBookToLibrary(bookMock)
     const foundBook = findBooksByAuthor("eel").pop()
 
-    assert.deepEqual(bookMock, foundBook)
+    assert.deepEqual({ ...bookMock, ...autoAddedParams }, foundBook)
   });
 
   it("Checkout Books", () => {
@@ -211,6 +259,47 @@ describe("Library Management", () => {
     assert.throws(() => {
       returnBook(foundBook.isbn)
     })
+
+  })
+
+  // ADVANCED TASKS 1
+
+  // limited checkouts
+  it("Checkout Books Over Limit", () => {
+    const bookMock = createBook("TS > JS", "Jeel", "mockisbn")
+    addBookToLibrary(bookMock)
+    const foundBook = findBooksByAuthor("Jeel").pop()
+    checkoutBook(foundBook.isbn)
+    assert.equal(foundBook.checkedOut, true)
+    assert.equal(foundBook.numOfCheckouts, 1)
+    returnBook(foundBook.isbn)
+
+    checkoutBook(foundBook.isbn)
+    assert.equal(foundBook.checkedOut, true)
+    assert.equal(foundBook.numOfCheckouts, 2)
+    returnBook(foundBook.isbn)
+
+    checkoutBook(foundBook.isbn)
+    assert.equal(foundBook.checkedOut, true)
+    assert.equal(foundBook.numOfCheckouts, 3)
+    returnBook(foundBook.isbn)
+
+    assert.throws(() => {
+      checkoutBook(foundBook.isbn)
+    }, "Book checkout limit reached")
+  })
+
+  // OverDue books
+  it("Should list overdue book", () => {
+    addBookToLibrary(createBook("TS > JS", "Jeel", "mockisbn1"))
+    addBookToLibrary(createBook("TS > JS", "Jeel", "mockisbn2"))
+    // make book1 overDue
+    library[0].dueDate = new Date(Date.now() - (DUE_DAY_LIMIT + 1) * 24 * 60 * 60 * 1000)
+
+    const overDueBooks = listOverdueBooks()
+    assert.deepEqual(overDueBooks.pop().isbn, "mockisbn1")
+    assert.equal(overDueBooks.pop(), undefined)
+    assert.equal(library.length, 2)
 
   })
 

@@ -101,8 +101,10 @@ function findBooksByAuthor(author) {
   if (typeof author !== "string") {
     throw new Error("Author must be string")
   }
+  author = Utils.notNull(Utils.nullIfEmpty(author))
 
-  return library.filter(x => x.author.toLowerCase() === author.toLowerCase())
+  // could use regex, but not worth it
+  return library.filter(x => x.author.toLowerCase().includes(author.toLowerCase()))
 }
 
 
@@ -142,6 +144,21 @@ describe("Library Management", () => {
     })
   })
 
+  it("Test Helper function", () => {
+    const bookMock = createBook("TS > JS", "Jeel", "mockisbn")
+    addBookToLibrary(bookMock)
+    assert.deepEqual(bookMock, getBookByISBN(bookMock.isbn))
+  })
+
+  it("Fail on repeating ISBN", () => {
+    const bookMock = createBook("TS > JS", "Jeel", "mockisbn")
+    const bookMock2 = structuredClone(bookMock)
+    addBookToLibrary(bookMock)
+    assert.throws(() => {
+      addBookToLibrary(bookMock2)
+    })
+  });
+
   it("Fail on non-string author argument", () => {
     assert.throws(() => {
       findBooksByAuthor(1)
@@ -152,6 +169,14 @@ describe("Library Management", () => {
     const bookMock = createBook("TS > JS", "Jeel", "mockisbn")
     addBookToLibrary(bookMock)
     const foundBook = findBooksByAuthor("Jeel").pop()
+
+    assert.deepEqual(bookMock, foundBook)
+  });
+
+  it("Get book by partial author name", () => {
+    const bookMock = createBook("TS > JS", "Jeel Patel", "mockisbn")
+    addBookToLibrary(bookMock)
+    const foundBook = findBooksByAuthor("eel").pop()
 
     assert.deepEqual(bookMock, foundBook)
   });

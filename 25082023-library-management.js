@@ -41,9 +41,6 @@ function createBook(title, author, isbn) {
   author = Utils.notNull(Utils.nullIfEmpty(author))
   isbn = Utils.notNull(Utils.nullIfEmpty(isbn))
 
-  if (library.find(x => x.isbn === isbn) !== undefined) {
-    throw new Error("Book with ISBN already exists!")
-  }
   return {
     title,
     author,
@@ -57,6 +54,10 @@ function addBookToLibrary(book) {
   const author = Utils.notNull(Utils.nullIfEmpty(book.author))
   const isbn = Utils.notNull(Utils.nullIfEmpty(book.isbn))
   const checkedOut = !!book.checkedOut
+
+  if (library.find(x => x.isbn === isbn) !== undefined) {
+    throw new Error("Book with ISBN already exists!")
+  }
 
   library.push({ title, author, isbn, checkedOut })
 }

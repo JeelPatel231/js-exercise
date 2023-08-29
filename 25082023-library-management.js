@@ -6,6 +6,7 @@ const library = [
     checkedOut: false,
     numOfCheckouts: 0,
     dueDate: null,
+    ratings: new Map()
   },
   {
     title: "1984",
@@ -13,7 +14,8 @@ const library = [
     isbn: "978-0-452-28423-4",
     checkedOut: true,
     numOfCheckouts: 0,
-    dueDate: new Date()
+    dueDate: new Date(),
+    ratings: new Map()
   },
   {
     title: "Brave New World",
@@ -22,6 +24,7 @@ const library = [
     checkedOut: false,
     numOfCheckouts: 0,
     dueDate: null,
+    ratings: new Map(),
   }
 ];
 
@@ -93,7 +96,8 @@ function addBookToLibrary(book) {
     isbn,
     checkedOut: false,
     numOfCheckouts: 0,
-    dueDate: null
+    dueDate: null,
+    ratings: new Map(),
   })
 }
 
@@ -149,14 +153,48 @@ function listOverdueBooks() {
   return library.filter(x => x.dueDate?.getTime() <= now)
 }
 
+function rateBook(isbn, rating, userId) {
+  /* since user system is not implemented, 
+   * we dont care if the user exists in the system 
+   * and is valid or not. There is no way to find out. 
+   * we assume userID is unique and exists in system.
+   * */
+  userId = Utils.notNull(Utils.nullIfEmpty(userId))
 
+  rating = +rating
+  if (isNaN(rating) || rating < 0 || rating > 5) {
+    throw Error("Enter a Valid Number between 0 to 5")
+  }
+
+  const book = getBookByISBN(isbn)
+  if (book === undefined) {
+    throw new Error("Book doesnt exist in library!")
+  }
+
+  book.ratings.set(userId, rating)
+}
+
+function getAverageRating(isbn) {
+  const book = getBookByISBN(isbn)
+  if (book === undefined) {
+    throw new Error("Book doesnt exist in library!")
+  }
+
+  const sum = Array.from(book.ratings.values()).reduce((a, b) => a + b, 0)
+  return sum / book.ratings.size
+}
 
 // -------------- //
 // MOCHA TEST CASES
 describe("Library Management", () => {
   const libraryBackup = structuredClone(library)
 
-  const autoAddedParams = { checkedOut: false, numOfCheckouts: 0, dueDate: null }
+  const autoAddedParams = {
+    checkedOut: false,
+    numOfCheckouts: 0,
+    dueDate: null,
+    ratings: new Map()
+  }
 
   beforeEach(() => {
     // truncate library
@@ -301,6 +339,33 @@ describe("Library Management", () => {
     assert.equal(overDueBooks.pop(), undefined)
     assert.equal(library.length, 2)
 
+  })
+
+  // book rating system
+  it("Should rate book only once", () => {
+    const isbn = "mockisbn"
+    addBookToLibrary(createBook("TS > JS", "Jeel", isbn))
+    // make book1 overDue
+    rateBook(isbn, 5, "user1")
+    assert.equal(getBookByISBN(isbn).ratings.get("user1"), 5)
+    assert.equal(getAverageRating(isbn), 5)
+
+    rateBook(isbn, 1, "user1")
+    assert.equal(getBookByISBN(isbn).ratings.get("user1"), 1)
+    assert.equal(getAverageRating(isbn), 1)
+  })
+
+  it("Should get average rating correctly", () => {
+    const isbn = "mockisbn"
+    addBookToLibrary(createBook("TS > JS", "Jeel", isbn))
+    // make book1 overDue
+    rateBook(isbn, 5, "user1")
+    assert.equal(getBookByISBN(isbn).ratings.get("user1"), 5)
+    assert.equal(getAverageRating(isbn), 5)
+
+    rateBook(isbn, 4, "user2")
+    assert.equal(getBookByISBN(isbn).ratings.get("user2"), 4)
+    assert.equal(getAverageRating(isbn), 4.5)
   })
 
 });

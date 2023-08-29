@@ -61,8 +61,13 @@ class Utils {
 function getBookByISBN(isbn) {
   isbn = Utils.notNull(Utils.nullIfEmpty(isbn))
 
-  // we dont care if its undefined or defined
-  return library.find(x => x.isbn === isbn)
+  const book = library.find(x => x.isbn === isbn)
+
+  if (book === undefined) {
+    throw new Error("Book doesnt exist in library!")
+  }
+
+  return book;
 }
 
 
@@ -86,7 +91,7 @@ function addBookToLibrary(book) {
   // Anomaly : how can a checkedout book be added to library
   // const checkedOut = !!book.checkedOut
 
-  if (getBookByISBN(isbn) !== undefined) {
+  if (library.find(x => x.isbn === isbn) !== undefined) {
     throw new Error("Book with ISBN already exists!")
   }
 
@@ -103,11 +108,6 @@ function addBookToLibrary(book) {
 
 function checkoutBook(isbn) {
   const book = getBookByISBN(isbn)
-
-  if (book === undefined) {
-    throw new Error("Book does not exist in library")
-  }
-
   if (book.checkedOut) {
     throw new Error("Book already checked out")
   }
@@ -124,10 +124,6 @@ function checkoutBook(isbn) {
 
 function returnBook(isbn) {
   const book = getBookByISBN(isbn)
-
-  if (book === undefined) {
-    throw new Error("Book not available in library")
-  }
 
   if (!book.checkedOut) {
     throw new Error("Book was not checked Out, ILLEGAL STATE")
@@ -167,9 +163,6 @@ function rateBook(isbn, rating, userId) {
   }
 
   const book = getBookByISBN(isbn)
-  if (book === undefined) {
-    throw new Error("Book doesnt exist in library!")
-  }
 
   book.ratings.set(userId, rating)
 }
@@ -181,9 +174,6 @@ function getAverage(iterator) {
 
 function getAverageRating(isbn) {
   const book = getBookByISBN(isbn)
-  if (book === undefined) {
-    throw new Error("Book doesnt exist in library!")
-  }
   return getAverage(book.ratings)
 }
 
@@ -272,13 +262,12 @@ describe("Library Management", () => {
 
   beforeEach(() => {
     // truncate library
-    library.length = 0;
+    library = [];
   })
 
   after(() => {
     // reset library after tests
-    library.length = 0;
-    library.push(...libraryBackup)
+    library = libraryBackup
   })
 
   it("Create some books", () => {

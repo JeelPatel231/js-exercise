@@ -184,6 +184,20 @@ function getAverageRating(isbn) {
   return sum / book.ratings.size
 }
 
+
+function searchBooks(partialAuthorOrName) {
+  if (typeof partialAuthorOrName !== "string") {
+    throw new Error("partialAuthororName must be string")
+  }
+  const query = Utils.notNull(Utils.nullIfEmpty(partialAuthorOrName))
+
+
+  return library.filter(x => {
+    return x.author.toLowerCase().includes(query.toLowerCase())
+      || x.title.toLowerCase().includes(query.toLowerCase())
+  })
+}
+
 // -------------- //
 // MOCHA TEST CASES
 describe("Library Management", () => {
@@ -366,6 +380,17 @@ describe("Library Management", () => {
     rateBook(isbn, 4, "user2")
     assert.equal(getBookByISBN(isbn).ratings.get("user2"), 4)
     assert.equal(getAverageRating(isbn), 4.5)
+  })
+
+  // search functionality
+  it("Should search with both author and book name", () => {
+    addBookToLibrary(createBook("TS > JS", "Jeel", "mockisbn"))
+    const bookNeeded = getBookByISBN("mockisbn")
+    assert.deepEqual(searchBooks("eel"), [bookNeeded])
+    assert.deepEqual(searchBooks("ts"), [bookNeeded])
+    assert.throws(() => {
+      searchBooks(" ")
+    }, "Data Must not be Null")
   })
 
 });

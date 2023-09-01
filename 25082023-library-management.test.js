@@ -192,10 +192,10 @@ describe("Library Management", () => {
 
   // SORT BOOKS
   it("Should sort books with given criterias", () => {
-    const b1 = createBook("abc", "def", "mockisbn1");
-    const b2 = createBook("bcd", "cde", "mockisbn2");
-    const b3 = createBook("cde", "bcd", "mockisbn3");
-    const b4 = createBook("def", "abc", "mockisbn4");
+    const b1 = createBook("a", "d", "mockisbn1");
+    const b2 = createBook("b", "c", "mockisbn2");
+    const b3 = createBook("c", "b", "mockisbn3");
+    const b4 = createBook("d", "a", "mockisbn4");
 
     const baseArray = [
       { ...b1, ...autoAddedParams, numOfCheckouts: 0 },
@@ -203,22 +203,43 @@ describe("Library Management", () => {
       { ...b3, ...autoAddedParams, numOfCheckouts: 2 },
       { ...b4, ...autoAddedParams, numOfCheckouts: 3 },
     ];
+
+    debugger;
     baseArray.forEach(x => addBookToLibrary(x));
     library.forEach((x, idx) => x.numOfCheckouts = idx)
 
-    sortLibrary({ author: true })
+    sortLibrary({ title: true })
+    assert.deepEqual(library, baseArray)
+
+    sortLibrary({ author: true, descending: true })
     assert.deepEqual(library, baseArray)
 
     sortLibrary({ checkouts: true })
     assert.deepEqual(library, baseArray)
 
     baseArray.reverse()
-
-    sortLibrary({ author: true, descending: true })
+    sortLibrary({ title: true, descending: true })
     assert.deepEqual(library, baseArray)
 
-    sortLibrary({ author: true, descending: true })
+    sortLibrary({ author: true })
     assert.deepEqual(library, baseArray)
+
+    sortLibrary({ checkouts: true, descending: true })
+    assert.deepEqual(library, baseArray)
+
+    library = [
+      createBook("a", "a", "isbn1"),
+      createBook("a", "a", "isbn1"),
+      createBook("d", "a", "isbn1"),
+      createBook("c", "a", "isbn1")
+    ]
+    library[0].numOfCheckouts = 1
+    library[1].numOfCheckouts = 0
+    library[2].numOfCheckouts = 2
+    library[3].numOfCheckouts = 3
+
+    sortLibrary({ title: true, checkouts: true })
+
   })
 
   // advanced storage

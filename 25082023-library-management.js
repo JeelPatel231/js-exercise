@@ -200,26 +200,31 @@ function sortLibrary({ title, author, rating, checkouts, dueDate, descending }) 
   checkouts = !!checkouts
   dueDate = !!dueDate
 
-  const factor = descending ? 1 : -1
+  const factor = descending ? -1 : 1
   /// 
   if (title) {
+    console.log("sorting by title")
     library.sort((a, b) => a.title.localeCompare(b.title) * factor)
   }
 
   if (author) {
+    console.log("sorting by author")
     library.sort((a, b) => a.author.localeCompare(b.author) * factor)
   }
 
   if (rating) {
-    library.sort((a, b) => (getAverage(b.ratings) - getAverage(a.ratings)) * factor)
+    console.log("sorting by rating")
+    library.sort((a, b) => (getAverage(a.ratings) - getAverage(b.ratings)) * factor)
   }
 
   if (checkouts) {
-    library.sort((a, b) => (b.numOfCheckouts - a.numOfCheckouts) * factor)
+    console.log("sorting by checkouts")
+    library.sort((a, b) => (a.numOfCheckouts - b.numOfCheckouts) * factor)
   }
 
   if (dueDate) {
-    library.sort((a, b) => (b.dueDate - a.dueDate) * factor)
+    console.log("sorting by duedate")
+    library.sort((a, b) => (a.dueDate - b.dueDate) * factor)
   }
 }
 

@@ -1,0 +1,65 @@
+/** 
+ * @param {?string} str 
+ * @returns {?string}
+ * */
+export function nullIfEmpty(str) {
+  if (str == null || str.trim() === '') {
+    return null
+  }
+
+  return str;
+}
+
+
+
+/**
+ * @param {number} num
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ * */
+export function coerceBetween(num, min, max) {
+  if (+num < min) {
+    return min;
+  }
+  if (+num > max) {
+    return max;
+  }
+
+  return +num;
+}
+
+
+/** @template T 
+   * @callback GetUniquePropCallback 
+   * @param {T} a
+   * @returns {string}
+   */
+
+/** @template T */
+export class UniqueArray extends Array {
+
+  /** @param {GetUniquePropCallback<T>} getUniqueProp */
+  constructor(getUniqueProp) {
+    super();
+    /** @private @type {GetUniquePropCallback<T>} */
+    this._getUniqueProp = getUniqueProp
+  }
+
+  /** 
+   * @param {T} item 
+   * */
+  alreadyExists(item) {
+    if (this.find(x => this._getUniqueProp(item) === this._getUniqueProp(x))) {
+      throw new Error("Item Already Exists in Array")
+    }
+  }
+
+  /** @param {...T} item 
+   * @returns number */
+  push(...item) {
+    item.forEach(x => this.alreadyExists(x))
+    return super.push(...item)
+  }
+
+}

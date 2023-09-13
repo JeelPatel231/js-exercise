@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Document</title>
+</head>
+<body>
+ <script type="module">
+  import { WebCryptoProvider } from "./cryptoprovider.js";
+  import { Library } from "./library.js";
+  import { provideWebStorage } from "./storage.js";
+  const lib = new Library(provideWebStorage(), new WebCryptoProvider());
+  window.library = lib;
+  ///
+  const book1 = lib.bookManager.addBook("a", "c", "isbn1")
+  const book2 = lib.bookManager.addBook("b", "b", "isbn2")
+  const book3 = lib.bookManager.addBook("c", "a", "isbn3")
+
+  let uJeel = lib.userManager.registerUser("Jeel")
+  let uLeej = lib.userManager.registerUser("Leej")
+ </script>
+</body>
+</html>

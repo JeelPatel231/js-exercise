@@ -1,12 +1,17 @@
 import { CryptoProvider } from "./cryptoprovider.js";
-import { UniqueArray } from "./helper.js";
+import { IllegalArgumentException } from "./errors.js";
+import { UniqueArray, nullIfEmpty } from "./helper.js";
 
 /** @private */
 class User {
   /** 
-   * @param {string} name
+   * @param {?string} name
    * @param {string} uuid */
   constructor(uuid, name) {
+    name = nullIfEmpty(name)
+    if(name == null){
+      throw new IllegalArgumentException("Name")
+    }
 
     /** @type {string} */
     this.name = name
@@ -28,7 +33,7 @@ export class UserManager extends UniqueArray {
    */
   checkValid(uuid){
     if (!this.find(x => x.uuid === uuid)){
-      throw new Error("UUID of given User invalid")
+      throw new IllegalArgumentException("UUID")
     }
   }
 

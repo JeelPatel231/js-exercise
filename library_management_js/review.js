@@ -1,4 +1,5 @@
 import { BookManager } from "./book.js"
+import { IllegalArgumentException } from "./errors.js"
 import { nullIfEmpty, coerceBetween, UniqueArray } from "./helper.js"
 import { UserManager } from "./user.js"
 
@@ -9,22 +10,22 @@ import { UserManager } from "./user.js"
 class Review {
 
   /**
-   * @param {string} author
-   * @param {import("./book.js").ISBN} bookIsbn
-   * @param {number} rating 
+   * @param {?string} author
+   * @param {?import("./book.js").ISBN} bookIsbn
+   * @param {?number} rating 
    * @param {?string} [comment]
    * */
   constructor(author, bookIsbn, rating, comment = null) {
     if (typeof rating != "number") {
-      throw new Error("Rating argument must be supplied as number")
+      throw new IllegalArgumentException("Rating")
     }
-
-    if (nullIfEmpty(author) == null) {
-      throw new Error("Author argument must be valid")
+    author = nullIfEmpty(author)
+    if (author == null) {
+      throw new IllegalArgumentException("Author")
     }
-
-    if (nullIfEmpty(bookIsbn) == null) {
-      throw new Error("Book ISBN argument must be valid")
+    bookIsbn = nullIfEmpty(bookIsbn)
+    if (bookIsbn == null) {
+      throw new IllegalArgumentException("Book")
     }
 
     /** @type {number} */

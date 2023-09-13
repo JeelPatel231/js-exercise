@@ -1,7 +1,9 @@
+import { NotImplementedError } from "./errors"
+
 export class CryptoProvider {
   /** @returns {string} */
   genUUID() {
-    throw new Error("Abstract class")
+    throw new NotImplementedError()
   }
 }
 

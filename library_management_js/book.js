@@ -1,3 +1,4 @@
+import { IllegalArgumentException, NotFoundError } from "./errors.js";
 import { UniqueArray, nullIfEmpty } from "./helper.js";
 
 /** @typedef {string} ISBN */
@@ -5,20 +6,24 @@ import { UniqueArray, nullIfEmpty } from "./helper.js";
 /** @private */
 class Book {
   /**
-  * @param {string} title
-  * @param {string} author 
-  * @param {ISBN} isbn 
+  * @param {?string} title
+  * @param {?string} author 
+  * @param {?ISBN} isbn 
   * */
   constructor(title, author, isbn) {
     // validations
-    if (nullIfEmpty(title) == null) {
-      throw new Error("Title is invalid")
+    title = nullIfEmpty(title)
+    author = nullIfEmpty(author)
+    isbn = nullIfEmpty(isbn)
+
+    if (title == null) {
+      throw new IllegalArgumentException("Title")
     }
-    if (nullIfEmpty(author) == null) {
-      throw new Error("Author is invalid")
+    if (author == null) {
+      throw new IllegalArgumentException("Author")
     }
-    if (nullIfEmpty(isbn) == null) {
-      throw new Error("ISBN is invalid")
+    if (isbn == null) {
+      throw new IllegalArgumentException("ISBN")
     }
 
     // assignments
@@ -52,16 +57,22 @@ export class BookManager extends UniqueArray {
 
   /** @param {ISBN} isbn */
   getBookByISBNSafe(isbn) {
-    return this.find(x => x.isbn === isbn.trim()) ?? null
+    if(nullIfEmpty(isbn) == null){
+      throw new IllegalArgumentException("ISBN")
+    }
+    return this.find(x => x.isbn === isbn) ?? null
   }
 
   /** @param {ISBN} isbn 
     * @returns {Book}
     **/
   getBookByISBN(isbn) {
-    const book = this.getBookByISBNSafe(isbn.trim())
+    if(nullIfEmpty(isbn) == null){
+      throw new IllegalArgumentException("ISBN")
+    }
+    const book = this.getBookByISBNSafe(isbn)
     if (book === null) {
-      throw new Error("Book Not Found")
+      throw new NotFoundError("Book")
     }
 
     return book;
@@ -69,13 +80,20 @@ export class BookManager extends UniqueArray {
 
   /** @param {string} author  */
   searchBookByAuthor(author) {
-    author = author.trim().toLowerCase()
+    author = author?.toLowerCase()
+    if(nullIfEmpty(author) == null) {
+      throw new IllegalArgumentException("Author")
+    }
     return this.filter(x => x.author.toLowerCase().includes(author))
   }
 
   /** @param {string} authorOrTitle */
   searchBookByTitleOrAuthor(authorOrTitle) {
-    const query = authorOrTitle.trim().toLowerCase();
+    const query = authorOrTitle?.toLowerCase();
+    if(nullIfEmpty(query) == null) {
+      throw new IllegalArgumentException("Query")
+    }
+
     return this.filter(x => {
       return x.author.toLowerCase().includes(query)
         || x.title.toLowerCase().includes(query)
@@ -106,7 +124,7 @@ export class BookManager extends UniqueArray {
     }
 
     if (key_map[key] == null) {
-      throw new Error("Unknown sorting key")
+      throw new IllegalArgumentException("Sorting Key")
     }
 
     this.sort((a, b) => key_map[key](a, b) * ordering)

@@ -1,9 +1,12 @@
+import { InvalidOperationError } from "./errors";
+
 /** 
- * @param {?string} str 
+ * @param {?string | undefined} str 
  * @returns {?string}
  * */
 export function nullIfEmpty(str) {
-  if (str == null || str.trim() === '') {
+  str = str?.trim()
+  if (str == null || str == '') {
     return null
   }
 
@@ -51,7 +54,7 @@ export class UniqueArray extends Array {
    * */
   alreadyExists(item) {
     if (this.find(x => this._getUniqueProp(item) === this._getUniqueProp(x))) {
-      throw new Error("Item Already Exists in Array")
+      throw new InvalidOperationError("Item Already Exists in Array")
     }
   }
 

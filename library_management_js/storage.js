@@ -1,4 +1,5 @@
 import { BookManager } from "./book.js";
+import { NotFoundError, NotImplementedError } from "./errors.js";
 import { Library } from "./library.js";
 import { ReviewManager } from "./review.js";
 import { TransactionManager } from "./transaction.js";
@@ -7,12 +8,12 @@ import { UserManager } from "./user.js";
 export class AbstractStorage {
   /** @param {Library} library */
   save(library){
-    throw new Error("Abstract class")
+    throw new NotImplementedError()
   }
 
   /** @param {Library} library */
   load(library){
-    throw new Error("Abstract class")
+    throw new NotImplementedError()
   }
 }
 
@@ -37,7 +38,7 @@ export class WebStorage extends AbstractStorage {
   load(library){
     const stringLib = localStorage.getItem("library")
     if(stringLib == null) {
-      throw new Error("Library not found in storage")
+      throw new NotFoundError("Library")
     }
     // handle json decoding errors
     const decoded = JSON.parse(stringLib)

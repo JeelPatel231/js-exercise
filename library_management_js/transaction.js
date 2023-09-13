@@ -1,5 +1,6 @@
 import { BookManager } from "./book.js"
 import { CryptoProvider } from "./cryptoprovider.js"
+import { IllegalArgumentException, InvalidOperationError } from "./errors.js";
 import { UniqueArray } from "./helper.js"
 import { UserManager } from "./user.js"
 
@@ -55,13 +56,14 @@ export class TransactionManager extends UniqueArray {
   }
 
   /**
+   * @private
    * @param {TransactionTypes} type 
    * @param {import("./book").ISBN} bookId
    * @param {string} userId
    * */
-  addTransaction(type, bookId, userId) {
+  _addTransaction(type, bookId, userId) {
     if (!(type in Object.values(TransactionTypes))) {
-      throw new Error("Invalid argument : Transaction Type not valid")
+      throw new IllegalArgumentException("Transaction Type")
     }
 
     this._bookMgr.getBookByISBN(bookId);
@@ -102,12 +104,12 @@ export class TransactionManager extends UniqueArray {
     this._userMgr.checkValid(userId);
     
     if (this.checkOutStatus(isbn) === TransactionTypes.CHECKOUT) {
-      throw new Error("Book already Checked out");
+      throw new InvalidOperationError("Book already Checked out");
     }
     if (this.getNumberOfCheckouts(book.isbn) >= MAX_CHECKOUTS) {
-      throw new Error("Book cannot be checked out anymore. Limit Reached!");
+      throw new InvalidOperationError("Book cannot be checked out anymore. Limit Reached!");
     }
-    this.addTransaction(TransactionTypes.CHECKOUT, isbn, userId);
+    this._addTransaction(TransactionTypes.CHECKOUT, isbn, userId);
   }
 
   /** 
@@ -119,14 +121,14 @@ export class TransactionManager extends UniqueArray {
     const lastTranxOfBook = this.filter(x => x.bookId === book.isbn).pop()
     
     if (this.checkOutStatus(isbn) === TransactionTypes.RETURN) {
-      throw new Error("Illegal State Exception : Book already in library")
+      throw new InvalidOperationError("Book already in library")
     }
 
     if (lastTranxOfBook?.userId !== userId) {
-      throw new Error("Illegal State Exception : you didnt checkout this book last time")
+      throw new InvalidOperationError("Book was NOT checked out by the same user")
     }
 
-    this.addTransaction(TransactionTypes.RETURN, isbn, userId)
+    this._addTransaction(TransactionTypes.RETURN, isbn, userId)
   }
 
   /**

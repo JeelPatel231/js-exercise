@@ -1,26 +1,15 @@
-import { BookManager } from "./book.js";
-import { Library } from "./library.js";
-import { ReviewManager } from "./review.js";
-import { TransactionManager } from "./transaction.js";
-import { UserManager } from "./user.js";
-
-export class AbstractStorage {
-  /** @param {Library} library */
-  save(library){
-    throw new Error("Abstract class")
-  }
-
-  /** @param {Library} library */
-  load(library){
-    throw new Error("Abstract class")
-  }
-}
-
+import { Library } from "../library.js"
+import { AbstractStorage } from "../storage.js"
+import { BookManager } from "../book.js"
+import { TransactionManager } from "../transaction.js"
+import { ReviewManager } from "../review.js"
+import { UserManager } from "../user.js"
+import * as fs from "node:fs"
 
 /**
  * @augments {AbstractStorage}
  */
-export class WebStorage extends AbstractStorage {
+export class NodeStorage extends AbstractStorage {
   /** @param {Library} library */
   save(library){
     let stringified = JSON.stringify({
@@ -28,17 +17,15 @@ export class WebStorage extends AbstractStorage {
       users: library.userManager,
       reviews: library.reviewManager,
       transactions: library.tranxManager,
-    })
+    }, null, 2)
 
-    localStorage.setItem("library", stringified)
+    fs.writeFileSync("lib.json",stringified)
   }
 
   /** @param {Library} library */
   load(library){
-    const stringLib = localStorage.getItem("library")
-    if(stringLib == null) {
-      throw new Error("Library not found in storage")
-    }
+   // TODO : bugfix : functions in class dont work after loading
+    const stringLib = fs.readFileSync("lib.json", "utf-8")
     // handle json decoding errors
     const decoded = JSON.parse(stringLib)
     // @ts-ignore

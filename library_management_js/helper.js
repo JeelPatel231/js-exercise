@@ -62,4 +62,12 @@ export class UniqueArray extends Array {
     return super.push(...item)
   }
 
+  /** 
+   * @param {string} uniquePropValue
+   * @returns {T[]}
+   */
+  findAndDelete(uniquePropValue){
+    return this.splice(this.findIndex((x) => this._getUniqueProp(x) === uniquePropValue),1)
+  }
+
 }

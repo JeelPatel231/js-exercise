@@ -1,5 +1,4 @@
 import { UniqueArray, nullIfEmpty } from "./helper.js";
-import { Review } from "./review.js";
 
 /** @typedef {string} ISBN */
 
@@ -29,56 +28,14 @@ class Book {
     this.author = author;
     /** @type {ISBN} */
     this.isbn = isbn;
-
-    // map key = userID, value = review class
-    /** @private @type {Map<string, Review>}*/
-    this._reviews = new Map();
   }
-
-  /** 
-   * @param {string} userId
-   * @param {Review} review
-   * */
-  addReview(userId, review) {
-    this._reviews.set(userId, review)
-  }
-
-  get reviews() {
-    // could be this._reviews.values() instead too
-    return Array.from(this._reviews.entries())
-  }
-
-  /**
-   * @param {?number} rating
-   * @param {?string} partialContent 
-   * */
-  findReview(rating, partialContent) {
-    let revs = this.reviews;
-    if (rating != null) {
-      revs = revs.filter(([_, x]) => x.rating === rating)
-    }
-
-    if (partialContent != null) {
-      revs = revs.filter(([_, x]) => x.comment?.includes(partialContent))
-    }
-    return revs;
-  }
-
-  get averageRating() {
-    const allRatings = Array.from(this.reviews.values()).map(([_, x]) => x.rating)
-    return allRatings.reduce((a, b) => a + b, 0) / allRatings.length
-  }
-
 }
 
 
 /** @augments UniqueArray<Book> */
 export class BookManager extends UniqueArray {
-  // /** @param {TransactionManager} transactionManager */
   constructor() {
     super((book) => book.isbn)
-    // /** @private @type {TransactionManager} */
-    // this._tranxManager = transactionManager;
   }
 
   /**
@@ -127,7 +84,7 @@ export class BookManager extends UniqueArray {
 
 
   /** 
-   * @param {'author' | 'title' | 'rating' } key 
+   * @param {'author' | 'title' } key 
    * @param {boolean} [descending=false]
    * */
   sortBooks(key, descending = false) {
@@ -144,7 +101,7 @@ export class BookManager extends UniqueArray {
       'author': (a, b) => a.author.toLowerCase().localeCompare(b.author.toLowerCase()),
       'title': (a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()),
       // 'duedate': (a, b) => (this.getDueDateOfBook(a.isbn)?.getTime() ?? 0) - (this.getDueDateOfBook(b.isbn)?.getTime() ?? 0),
-      'rating': (a, b) => a.averageRating - b.averageRating,
+      // 'rating': (a, b) => a.averageRating - b.averageRating,
       // 'numofcheckouts': (a, b) => this.getNumberOfCheckouts(a.isbn) - this.getNumberOfCheckouts(b.isbn),
     }
 

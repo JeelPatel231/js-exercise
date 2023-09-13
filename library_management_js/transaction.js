@@ -1,5 +1,5 @@
 import { BookManager } from "./book.js"
-import { CryptoProvider, NodeCryptoProvider } from "./cryptoprovider.js"
+import { CryptoProvider } from "./cryptoprovider.js"
 import { UniqueArray } from "./helper.js"
 import { UserManager } from "./user.js"
 

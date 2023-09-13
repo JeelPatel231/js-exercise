@@ -41,7 +41,7 @@ export class UserManager extends UniqueArray {
 
   /** @param {string} uuid */
   deleteUser(uuid) {
-    throw new Error("UNIMPLEMENTED")
+    this.findAndDelete(uuid)
   }
 };
 

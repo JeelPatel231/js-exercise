@@ -5,23 +5,46 @@
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Document</title>
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/10.2.0/mocha.min.js"
+  integrity="sha512-jsP/sG70bnt0xNVJt+k9NxQqGYvRrLzWhI+46SSf7oNJeCwdzZlBvoyrAN0zhtVyolGcHNh/9fEgZppG2pH+eA=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/10.2.0/mocha.css"
+  integrity="sha512-SjDc34mGAkSBKnNMasz1QPVustFyPQUHUO5wxzGNC5x9wQMcHwDHXCNRYowC/6DsX0lqvpCI1mKiVEQkws2olw=="
+  crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.3.8/chai.min.js"
+  integrity="sha512-kblxofM8P+Fiq83KsnzTlFoM9YNhBauLW5DtBqVBiE5iXy/+G2l051jKzUL1DdTjQ1WGxMyh6n3cO+dLfwxKaw=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 </head>
 
 <body>
+ <div id="mocha"></div>
+
+ <script class="mocha-init">
+  mocha.setup('bdd');
+  mocha.checkLeaks();
+  var assert = chai.assert
+ </script>
+
+ <script type="module" src="./tests/uniqueArray.test.js"></script>
+ <script type="module" src="./tests/userManager.test.js"></script>
+ <script type="module" src="./tests/bookManager.test.js"></script>
+ <script type="module" src="./tests/reviewManager.test.js"></script>
+ <script type="module" src="./tests/transactionManager.test.js"></script>
+ <script type="module" class="mocha-exec">
+  mocha.run();
+ </script>
+
  <script type="module">
   import {Library} from "./library.js";
   import {WebCryptoProvider} from "./cryptoprovider.js"
   import {provideWebStorage} from "./storage.js"
-  const lib = new Library(provideWebStorage, new WebCryptoProvider());
-  window.library = lib;
-  ///
-  const book1 = lib.books.addBook("a", "c", "isbn1")
-  const book2 = lib.books.addBook("b", "b", "isbn2")
-  const book3 = lib.books.addBook("c", "a", "isbn3")
-
-  let uJeel = lib.users.registerUser("Jeel")
-  let uLeej = lib.users.registerUser("Leej")
+  window.library = new Library(provideWebStorage, new WebCryptoProvider());
  </script>
+
 </body>
 
 </html>

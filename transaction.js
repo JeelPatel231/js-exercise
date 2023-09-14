@@ -6,9 +6,6 @@ import { UserManager } from "./user.js"
 
 /** @typedef {import("./book").ISBN} ISBN */
 
-const MAX_DUE_DAYS = 7;
-const MAX_CHECKOUTS = 3;
-
 /** @readonly @enum {number} */
 export const TransactionTypes = {
   CHECKOUT: 0,
@@ -53,6 +50,13 @@ export class TransactionManager extends UniqueArray {
 
     /** @private */
     this._userMgr = userMgr;
+  }
+
+  static get MAX_DUE_DAYS() {
+    return 7
+  }
+  static get MAX_CHECKOUTS() {
+    return 3
   }
 
   /**
@@ -118,7 +122,7 @@ export class TransactionManager extends UniqueArray {
     if (this.checkOutStatus(isbn) === TransactionTypes.CHECKOUT) {
       throw new InvalidOperationError("Book already Checked out");
     }
-    if (this.getNumberOfCheckouts(book.isbn) >= MAX_CHECKOUTS) {
+    if (this.getNumberOfCheckouts(book.isbn) >= TransactionManager.MAX_CHECKOUTS) {
       throw new InvalidOperationError("Book cannot be checked out anymore. Limit Reached!");
     }
     this._addTransaction(TransactionTypes.CHECKOUT, isbn, userId);
@@ -152,7 +156,7 @@ export class TransactionManager extends UniqueArray {
     if (lastTranxOfBook.transactionType !== TransactionTypes.CHECKOUT) {
       return null
     }
-    return new Date(Date.now() + (MAX_DUE_DAYS * 24 * 60 * 60 * 1000))
+    return new Date(Date.now() + (TransactionManager.MAX_DUE_DAYS * 24 * 60 * 60 * 1000))
   }
 
 }

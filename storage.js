@@ -30,10 +30,10 @@ export class WebStorage extends AbstractStorage {
 
   save() {
     let stringified = JSON.stringify({
-      books: this._library.bookManager,
-      users: this._library.userManager,
-      reviews: this._library.reviewManager,
-      transactions: this._library.tranxManager,
+      books: this._library.books,
+      users: this._library.users,
+      reviews: this._library.reviews,
+      transactions: this._library.tranx,
     })
 
     localStorage.setItem("library", stringified)
@@ -47,13 +47,13 @@ export class WebStorage extends AbstractStorage {
     // handle json decoding errors
     const decoded = JSON.parse(stringLib)
     // @ts-ignore
-    this._library.bookManager = BookManager.from(decoded.books)
+    this._library.books = BookManager.from(decoded.books)
     // @ts-ignore
-    this._library.userManager = UserManager.from(decoded.users)
+    this._library.users = UserManager.from(decoded.users)
     // @ts-ignore
-    this._library.reviewManager = ReviewManager.from(decoded.reviews)
+    this._library.reviews = ReviewManager.from(decoded.reviews)
     // @ts-ignore
-    this._library.tranxManager = TransactionManager.from(decoded.transactions)
+    this._library.tranx = TransactionManager.from(decoded.transactions)
   }
 }
 

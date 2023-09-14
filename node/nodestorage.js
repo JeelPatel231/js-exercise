@@ -1,4 +1,3 @@
-import { Library } from "../library.js"
 import { AbstractStorage } from "../storage.js"
 import { BookManager } from "../book.js"
 import { TransactionManager } from "../transaction.js"
@@ -12,10 +11,10 @@ import * as fs from "node:fs"
 export class NodeStorage extends AbstractStorage {
   save() {
     let stringified = JSON.stringify({
-      books: this._library.bookManager,
-      users: this._library.userManager,
-      reviews: this._library.reviewManager,
-      transactions: this._library.tranxManager,
+      books: this._library.books,
+      users: this._library.users,
+      reviews: this._library.reviews,
+      transactions: this._library.tranx,
     }, null, 2)
 
     fs.writeFileSync("lib.json", stringified)
@@ -26,13 +25,13 @@ export class NodeStorage extends AbstractStorage {
     const stringLib = fs.readFileSync("lib.json", "utf-8")
     // handle json decoding errors
     const decoded = JSON.parse(stringLib)
-    // @ts-ignore
-    this._library.bookManager = BookManager.from(decoded.books)
-    // @ts-ignore
-    this._library.userManager = UserManager.from(decoded.users)
-    // @ts-ignore
-    this._library.reviewManager = ReviewManager.from(decoded.reviews)
-    // @ts-ignore
-    this._library.tranxManager = TransactionManager.from(decoded.transactions)
+    //@ts-ignore
+    this._library.books = BookManager.from(decoded.books)
+    //@ts-ignore
+    this._library.users = UserManager.from(decoded.users)
+    //@ts-ignore
+    this._library.reviews = ReviewManager.from(decoded.reviews)
+    //@ts-ignore
+    this._library.tranx = TransactionManager.from(decoded.transactions)
   }
 }

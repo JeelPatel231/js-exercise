@@ -24,19 +24,19 @@ export class Library {
     this._cryptoObject = crypto;
    
     /** @type {BookManager} */
-    this.bookManager = new BookManager();
+    this.books = new BookManager();
     
     /** @type {UserManager} */
-    this.userManager = new UserManager(this._cryptoObject);
+    this.users = new UserManager(this._cryptoObject);
 
     /** @type {AbstractStorage} */
     this.storage = storage(this);
 
     /** @type {TransactionManager} */
-    this.tranxManager = new TransactionManager(this._cryptoObject, this.bookManager, this.userManager);
+    this.tranx = new TransactionManager(this._cryptoObject, this.books, this.users);
 
     /** @type {ReviewManager} */
-    this.reviewManager = new ReviewManager(this.bookManager, this.userManager);
+    this.reviews = new ReviewManager(this.books, this.users);
   
   }
 }

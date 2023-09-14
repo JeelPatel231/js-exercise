@@ -71,7 +71,7 @@ export class BookManager extends UniqueArray {
       throw new IllegalArgumentException("ISBN")
     }
     const book = this.getBookByISBNSafe(isbn)
-    if (book === null) {
+    if (book == null) {
       throw new NotFoundError("Book")
     }
 

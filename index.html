@@ -1,31 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8" />
-  <title>Library Management | Mocha Tests</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Document</title>
 </head>
-
 <body>
-  <div id="mocha"></div>
+ <script type="module">
+  import { WebCryptoProvider } from "./cryptoprovider.js";
+  import { Library } from "./library.js";
+  import { provideWebStorage } from "./storage.js";
+  const lib = new Library(provideWebStorage(), new WebCryptoProvider());
+  window.library = lib;
+  ///
+  const book1 = lib.bookManager.addBook("a", "c", "isbn1")
+  const book2 = lib.bookManager.addBook("b", "b", "isbn2")
+  const book3 = lib.bookManager.addBook("c", "a", "isbn3")
 
-  <script src="https://unpkg.com/chai/chai.js"></script>
-  <script src="https://unpkg.com/mocha/mocha.js"></script>
-
-  <script class="mocha-init">
-    mocha.setup('bdd');
-    mocha.checkLeaks();
-    var assert = chai.assert
-  </script>
-
-  <script src="25082023-library-management.js"></script>
-  <script src="25082023-library-management.test.js"></script>
-
-  <script class="mocha-exec">
-    mocha.run();
-  </script>
+  let uJeel = lib.userManager.registerUser("Jeel")
+  let uLeej = lib.userManager.registerUser("Leej")
+ </script>
 </body>
-
 </html>

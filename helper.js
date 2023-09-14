@@ -1,4 +1,4 @@
-import { InvalidOperationError } from "./errors";
+import { InvalidOperationError } from "./errors.js";
 
 /** 
  * @param {?string | undefined} str 
@@ -69,8 +69,8 @@ export class UniqueArray extends Array {
    * @param {string} uniquePropValue
    * @returns {T[]}
    */
-  findAndDelete(uniquePropValue){
-    return this.splice(this.findIndex((x) => this._getUniqueProp(x) === uniquePropValue),1)
+  findAndDelete(uniquePropValue) {
+    return this.splice(this.findIndex((x) => this._getUniqueProp(x) === uniquePropValue), 1)
   }
 
 }

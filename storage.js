@@ -7,12 +7,17 @@ import { UserManager } from "./user.js";
 
 export class AbstractStorage {
   /** @param {Library} library */
-  save(library){
+
+  constructor(library) {
+    /** @protected @type {Library} */
+    this._library = library
+  }
+
+  save() {
     throw new NotImplementedError()
   }
 
-  /** @param {Library} library */
-  load(library){
+  load() {
     throw new NotImplementedError()
   }
 }
@@ -22,33 +27,39 @@ export class AbstractStorage {
  * @augments {AbstractStorage}
  */
 export class WebStorage extends AbstractStorage {
-  /** @param {Library} library */
-  save(library){
+
+  save() {
     let stringified = JSON.stringify({
-      books: library.bookManager,
-      users: library.userManager,
-      reviews: library.reviewManager,
-      transactions: library.tranxManager,
+      books: this._library.bookManager,
+      users: this._library.userManager,
+      reviews: this._library.reviewManager,
+      transactions: this._library.tranxManager,
     })
 
     localStorage.setItem("library", stringified)
   }
 
-  /** @param {Library} library */
-  load(library){
+  load() {
     const stringLib = localStorage.getItem("library")
-    if(stringLib == null) {
+    if (stringLib == null) {
       throw new NotFoundError("Library")
     }
     // handle json decoding errors
     const decoded = JSON.parse(stringLib)
     // @ts-ignore
-    library.bookManager = BookManager.from(decoded.books)
+    this._library.bookManager = BookManager.from(decoded.books)
     // @ts-ignore
-    library.userManager = UserManager.from(decoded.users)
+    this._library.userManager = UserManager.from(decoded.users)
     // @ts-ignore
-    library.reviewManager = ReviewManager.from(decoded.reviews)
+    this._library.reviewManager = ReviewManager.from(decoded.reviews)
     // @ts-ignore
-    library.tranxManager = TransactionManager.from(decoded.transactions)
+    this._library.tranxManager = TransactionManager.from(decoded.transactions)
   }
+}
+
+/** @param {Library} library  
+ *  @returns {WebStorage}
+ * */
+export function provideWebStorage(library) {
+  return new WebStorage(library)
 }

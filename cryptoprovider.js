@@ -1,4 +1,4 @@
-import { NotImplementedError } from "./errors"
+import { NotImplementedError } from "./errors.js"
 
 export class CryptoProvider {
   /** @returns {string} */

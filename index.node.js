@@ -3,8 +3,8 @@ import { Library } from "./library.js";
 import { NodeCryptoProvider } from "./node/nodecrytoprovider.js";
 import { TransactionTypes } from "./transaction.js";
 
-const lib = new Library(new NodeStorage(), new NodeCryptoProvider())
-const lib2 = new Library(new NodeStorage(), new NodeCryptoProvider())
+const lib = new Library((lib) => new NodeStorage(lib), new NodeCryptoProvider())
+const lib2 = new Library((lib) => new NodeStorage(lib), new NodeCryptoProvider())
 
 const book1 = lib.bookManager.addBook("a", "c", "isbn1")
 const book2 = lib.bookManager.addBook("b", "b", "isbn2")

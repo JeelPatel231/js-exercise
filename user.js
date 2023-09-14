@@ -9,7 +9,7 @@ class User {
    * @param {string} uuid */
   constructor(uuid, name) {
     name = nullIfEmpty(name)
-    if(name == null){
+    if (name == null) {
       throw new IllegalArgumentException("Name")
     }
 
@@ -26,15 +26,6 @@ export class UserManager extends UniqueArray {
   constructor(cryptoObject) {
     super((user) => user.uuid)
     this._crypto = cryptoObject
-  }
-
-  /**
-   * @param {string} uuid 
-   */
-  checkValid(uuid){
-    if (!this.find(x => x.uuid === uuid)){
-      throw new IllegalArgumentException("UUID")
-    }
   }
 
   /** @param {string} name */

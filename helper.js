@@ -1,4 +1,4 @@
-import { InvalidOperationError } from "./errors.js";
+import { InvalidOperationError, NotFoundError } from "./errors.js";
 
 /** 
  * @param {?string | undefined} str 
@@ -51,17 +51,26 @@ export class UniqueArray extends Array {
 
   /** 
    * @param {T} item 
+   * @returns {boolean}
    * */
-  alreadyExists(item) {
-    if (this.find(x => this._getUniqueProp(item) === this._getUniqueProp(x))) {
-      throw new InvalidOperationError("Item Already Exists in Array")
-    }
+  findUnique(item) {
+    return this.find(x => this._getUniqueProp(item) === this._getUniqueProp(x))
+  }
+
+  /**
+   * @param {string} uniqueParam
+   * @returns {T}
+   */
+  findByUniqueProp(uniqueParam) {
+    return this.find(x => this._getUniqueProp(x) === uniqueParam)
   }
 
   /** @param {...T} item 
    * @returns number */
   push(...item) {
-    item.forEach(x => this.alreadyExists(x))
+    if (item.some(x => !!this.findUnique(x))) {
+      throw new InvalidOperationError("Item Already Exists in Array")
+    }
     return super.push(...item)
   }
 
@@ -70,7 +79,11 @@ export class UniqueArray extends Array {
    * @returns {T[]}
    */
   findAndDelete(uniquePropValue) {
-    return this.splice(this.findIndex((x) => this._getUniqueProp(x) === uniquePropValue), 1)
+    const index = this.findIndex((x) => this._getUniqueProp(x) === uniquePropValue)
+    if (index == -1) {
+      throw new NotFoundError("Item")
+    }
+    return this.splice(index, 1)
   }
 
 }

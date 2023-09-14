@@ -57,17 +57,17 @@ export class BookManager extends UniqueArray {
 
   /** @param {ISBN} isbn */
   getBookByISBNSafe(isbn) {
-    if(nullIfEmpty(isbn) == null){
+    if (nullIfEmpty(isbn) == null) {
       throw new IllegalArgumentException("ISBN")
     }
-    return this.find(x => x.isbn === isbn) ?? null
+    return this.findByUniqueProp(isbn)
   }
 
   /** @param {ISBN} isbn 
     * @returns {Book}
     **/
   getBookByISBN(isbn) {
-    if(nullIfEmpty(isbn) == null){
+    if (nullIfEmpty(isbn) == null) {
       throw new IllegalArgumentException("ISBN")
     }
     const book = this.getBookByISBNSafe(isbn)
@@ -81,7 +81,7 @@ export class BookManager extends UniqueArray {
   /** @param {string} author  */
   searchBookByAuthor(author) {
     author = author?.toLowerCase()
-    if(nullIfEmpty(author) == null) {
+    if (nullIfEmpty(author) == null) {
       throw new IllegalArgumentException("Author")
     }
     return this.filter(x => x.author.toLowerCase().includes(author))
@@ -90,7 +90,7 @@ export class BookManager extends UniqueArray {
   /** @param {string} authorOrTitle */
   searchBookByTitleOrAuthor(authorOrTitle) {
     const query = authorOrTitle?.toLowerCase();
-    if(nullIfEmpty(query) == null) {
+    if (nullIfEmpty(query) == null) {
       throw new IllegalArgumentException("Query")
     }
 

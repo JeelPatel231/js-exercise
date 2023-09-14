@@ -1,5 +1,5 @@
 import { BookManager } from "./book.js"
-import { IllegalArgumentException } from "./errors.js"
+import { IllegalArgumentException, InvalidOperationError } from "./errors.js"
 import { nullIfEmpty, coerceBetween, UniqueArray } from "./helper.js"
 import { UserManager } from "./user.js"
 
@@ -61,6 +61,20 @@ export class ReviewManager extends UniqueArray {
     /** @private */
     this._userMgr = userMgr;
   }
+
+  /**
+   * @private
+   * @param {import("./book").ISBN} bookId
+   * @param {string} userId
+   * */
+  _validateBookAndUser(bookId, userId) {
+    const book = this._bookMgr.getBookByISBN(bookId);
+    const user = this._userMgr.findByUniqueProp(userId)
+    if (!user) {
+      throw new InvalidOperationError("User Doesnt Exist in System")
+    }
+    return { book, user }
+  }
  
   /**
    * @param {string} userId
@@ -69,8 +83,7 @@ export class ReviewManager extends UniqueArray {
    * @param {?string} [comment]
    * */
   addReview(userId, bookIsbn, rating, comment = null){
-    this._bookMgr.getBookByISBN(bookIsbn);
-    this._userMgr.checkValid(userId);
+    this._validateBookAndUser(bookIsbn, userId)
     this.push(new Review(userId, bookIsbn, rating, comment));
   }
 

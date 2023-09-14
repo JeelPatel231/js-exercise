@@ -43,7 +43,7 @@ export class TransactionManager extends UniqueArray {
    * @param {BookManager} bookMgr 
    * @param {UserManager} userMgr
    */
-  constructor(cryptoprovider,bookMgr, userMgr){
+  constructor(cryptoprovider, bookMgr, userMgr) {
     super((t) => t.transactionId);
     /** @private */
     this._crypto = cryptoprovider;
@@ -57,6 +57,20 @@ export class TransactionManager extends UniqueArray {
 
   /**
    * @private
+   * @param {import("./book").ISBN} bookId
+   * @param {string} userId
+   * */
+  _validateBookAndUser(bookId, userId) {
+    const book = this._bookMgr.getBookByISBN(bookId);
+    const user = this._userMgr.findByUniqueProp(userId)
+    if (!user) {
+      throw new InvalidOperationError("User Doesnt Exist in System")
+    }
+    return { book, user }
+  }
+
+  /**
+   * @private
    * @param {TransactionTypes} type 
    * @param {import("./book").ISBN} bookId
    * @param {string} userId
@@ -66,8 +80,7 @@ export class TransactionManager extends UniqueArray {
       throw new IllegalArgumentException("Transaction Type")
     }
 
-    this._bookMgr.getBookByISBN(bookId);
-    this._userMgr.checkValid(userId);
+    this._validateBookAndUser(bookId, userId);
 
     const tranx = new Transaction(type, bookId, userId, this._crypto.genUUID())
     console.log(tranx)
@@ -91,7 +104,7 @@ export class TransactionManager extends UniqueArray {
   /** @param {ISBN} isbn 
    *  @returns {number} */
   getNumberOfCheckouts(isbn) {
-    const checkoutsOfBook = this.filter((x) => 
+    const checkoutsOfBook = this.filter((x) =>
       x.bookId === isbn && x.transactionType === TransactionTypes.CHECKOUT
     )
     return checkoutsOfBook.length
@@ -100,9 +113,8 @@ export class TransactionManager extends UniqueArray {
   /** @param {ISBN} isbn
     * @param {string} userId  */
   checkOutBook(isbn, userId) {
-    const book = this._bookMgr.getBookByISBN(isbn);
-    this._userMgr.checkValid(userId);
-    
+    const { book } = this._validateBookAndUser(isbn, userId);
+
     if (this.checkOutStatus(isbn) === TransactionTypes.CHECKOUT) {
       throw new InvalidOperationError("Book already Checked out");
     }
@@ -116,10 +128,10 @@ export class TransactionManager extends UniqueArray {
    * @param {ISBN} isbn
    * @param {string} userId  */
   returnBook(isbn, userId) {
-    const book = this._bookMgr.getBookByISBN(isbn)
-    this._userMgr.checkValid(userId)
+    const { book } = this._validateBookAndUser(isbn, userId);
+
     const lastTranxOfBook = this.filter(x => x.bookId === book.isbn).pop()
-    
+
     if (this.checkOutStatus(isbn) === TransactionTypes.RETURN) {
       throw new InvalidOperationError("Book already in library")
     }
@@ -135,9 +147,9 @@ export class TransactionManager extends UniqueArray {
    * @param {ISBN} isbn 
    * @returns {?Date}
    */
-  getDueDateOfBook(isbn){
+  getDueDateOfBook(isbn) {
     const lastTranxOfBook = this.filter(x => x.bookId === isbn).pop();
-    if(lastTranxOfBook.transactionType !== TransactionTypes.CHECKOUT) {
+    if (lastTranxOfBook.transactionType !== TransactionTypes.CHECKOUT) {
       return null
     }
     return new Date(Date.now() + (MAX_DUE_DAYS * 24 * 60 * 60 * 1000))

@@ -1,6 +1,6 @@
 import { BookManager } from "./book.js"
 import { CryptoProvider } from "./cryptoprovider.js"
-import { IllegalArgumentException, InvalidOperationError } from "./errors.js";
+import { IllegalArgumentException, InvalidOperationError, NotFoundError } from "./errors.js";
 import { UniqueArray } from "./helper.js"
 import { UserManager } from "./user.js"
 
@@ -64,7 +64,7 @@ export class TransactionManager extends UniqueArray {
     const book = this._bookMgr.getBookByISBN(bookId);
     const user = this._userMgr.findByUniqueProp(userId)
     if (!user) {
-      throw new InvalidOperationError("User Doesnt Exist in System")
+      throw new NotFoundError("User")
     }
     return { book, user }
   }

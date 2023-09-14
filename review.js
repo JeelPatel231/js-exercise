@@ -36,24 +36,24 @@ class Review {
 
     /** @type {string} */
     this.author = author
-  
+
     /** @type {string} */
     this.bookIsbn = bookIsbn
   }
 
-  get reviewId(){
+  get reviewId() {
     return this.author + this.bookIsbn
   }
 }
 
- /** @augments UniqueArray<Review> */
+/** @augments UniqueArray<Review> */
 export class ReviewManager extends UniqueArray {
 
   /**
    * @param {BookManager} bookMgr 
    * @param {UserManager} userMgr 
    */
-  constructor(bookMgr, userMgr){
+  constructor(bookMgr, userMgr) {
     // author + bookisbn act as ID, unique
     super((review) => review.reviewId);
     /** @private */
@@ -71,18 +71,18 @@ export class ReviewManager extends UniqueArray {
     const book = this._bookMgr.getBookByISBN(bookId);
     const user = this._userMgr.findByUniqueProp(userId);
     if (!user) {
-      throw new NotFoundError("User Doesnt Exist in System")
+      throw new NotFoundError("User")
     }
     return { book, user }
   }
- 
+
   /**
    * @param {string} userId
    * @param {import("./book.js").ISBN} bookIsbn
    * @param {number} rating 
    * @param {?string} [comment]
    * */
-  addReview(userId, bookIsbn, rating, comment = null){
+  addReview(userId, bookIsbn, rating, comment = null) {
     this._validateBookAndUser(bookIsbn, userId)
     this.push(new Review(userId, bookIsbn, rating, comment));
   }
@@ -93,10 +93,10 @@ export class ReviewManager extends UniqueArray {
    * @param {number} rating 
    * @param {?string} [comment]
    * */
-  editReview(userId, bookIsbn, rating, comment = null){
+  editReview(userId, bookIsbn, rating, comment = null) {
     this._validateBookAndUser(bookIsbn, userId);
-    const review = this.findByUniqueProp(userId+bookIsbn);
-    if(review == null){
+    const review = this.findByUniqueProp(userId + bookIsbn);
+    if (review == null) {
       throw new NotFoundError("Review")
     }
     review.rating = rating
@@ -104,16 +104,16 @@ export class ReviewManager extends UniqueArray {
   }
 
   /** @param {string} reviewId */
-  deleteReview(reviewId){
+  deleteReview(reviewId) {
     this.findAndDelete(reviewId)
   }
 
   /** 
    * @param {import("./book.js").ISBN} bookIsbn
    * @returns {number} */
-  averageRating(bookIsbn){
+  averageRating(bookIsbn) {
     let numArray = this.filter((rev) => rev.bookIsbn === bookIsbn).map((x) => x.rating);
-    return numArray.reduce((a,b) => a+b, 0) / numArray.length;
+    return numArray.reduce((a, b) => a + b, 0) / numArray.length;
   }
 
   /**
@@ -124,23 +124,23 @@ export class ReviewManager extends UniqueArray {
    * @param {?string} obj.partialContent
    * @returns {Review[]}
    */
-  findReview({bookIsbn, userId, rating, partialContent} = {
+  findReview({ bookIsbn, userId, rating, partialContent } = {
     bookIsbn: null,
-    userId : null,
-    rating : null, 
-    partialContent : null
+    userId: null,
+    rating: null,
+    partialContent: null
   }) {
     let bookReviews = [...this];
-    if (bookIsbn != null){
+    if (bookIsbn != null) {
       bookReviews = bookReviews.filter((r) => r.bookIsbn === bookIsbn)
     }
-    if (rating != null){
+    if (rating != null) {
       bookReviews = bookReviews.filter((r) => r.rating === rating)
     }
-    if (userId != null){
+    if (userId != null) {
       bookReviews = bookReviews.filter((r) => r.author === userId)
     }
-    if (nullIfEmpty(partialContent) != null){
+    if (nullIfEmpty(partialContent) != null) {
       bookReviews = bookReviews.filter((r) => r.comment?.includes(partialContent))
     }
 

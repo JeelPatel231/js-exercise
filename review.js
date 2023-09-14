@@ -1,5 +1,5 @@
 import { BookManager } from "./book.js"
-import { IllegalArgumentException, InvalidOperationError } from "./errors.js"
+import { IllegalArgumentException, NotFoundError } from "./errors.js"
 import { nullIfEmpty, coerceBetween, UniqueArray } from "./helper.js"
 import { UserManager } from "./user.js"
 
@@ -69,9 +69,9 @@ export class ReviewManager extends UniqueArray {
    * */
   _validateBookAndUser(bookId, userId) {
     const book = this._bookMgr.getBookByISBN(bookId);
-    const user = this._userMgr.findByUniqueProp(userId)
+    const user = this._userMgr.findByUniqueProp(userId);
     if (!user) {
-      throw new InvalidOperationError("User Doesnt Exist in System")
+      throw new NotFoundError("User Doesnt Exist in System")
     }
     return { book, user }
   }
@@ -85,6 +85,22 @@ export class ReviewManager extends UniqueArray {
   addReview(userId, bookIsbn, rating, comment = null){
     this._validateBookAndUser(bookIsbn, userId)
     this.push(new Review(userId, bookIsbn, rating, comment));
+  }
+
+  /**
+   * @param {string} userId
+   * @param {import("./book.js").ISBN} bookIsbn
+   * @param {number} rating 
+   * @param {?string} [comment]
+   * */
+  editReview(userId, bookIsbn, rating, comment = null){
+    this._validateBookAndUser(bookIsbn, userId);
+    const review = this.findByUniqueProp(userId+bookIsbn);
+    if(review == null){
+      throw new NotFoundError("Review")
+    }
+    review.rating = rating
+    review.comment = comment
   }
 
   /** @param {string} reviewId */
@@ -101,20 +117,31 @@ export class ReviewManager extends UniqueArray {
   }
 
   /**
-   * @param {import("./book.js").ISBN} bookIsbn 
-   * @param {?number} [rating]
-   * @param {?string} [partialContent]
+   * @param {Object} obj
+   * @param {?import("./book.js").ISBN} obj.bookIsbn 
+   * @param {?string} obj.userId
+   * @param {?number} obj.rating
+   * @param {?string} obj.partialContent
    * @returns {Review[]}
    */
-  findReview(bookIsbn, rating = null, partialContent = null) {
-    this._bookMgr.getBookByISBN(bookIsbn);
-    let bookReviews = this.filter((r) => r.bookIsbn === bookIsbn)
+  findReview({bookIsbn, userId, rating, partialContent} = {
+    bookIsbn: null,
+    userId : null,
+    rating : null, 
+    partialContent : null
+  }) {
+    let bookReviews = [...this];
+    if (bookIsbn != null){
+      bookReviews = bookReviews.filter((r) => r.bookIsbn === bookIsbn)
+    }
     if (rating != null){
       bookReviews = bookReviews.filter((r) => r.rating === rating)
     }
-
+    if (userId != null){
+      bookReviews = bookReviews.filter((r) => r.author === userId)
+    }
     if (nullIfEmpty(partialContent) != null){
-      bookReviews = bookReviews.filter((r) => r.comment.includes(partialContent))
+      bookReviews = bookReviews.filter((r) => r.comment?.includes(partialContent))
     }
 
     return bookReviews

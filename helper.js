@@ -59,7 +59,7 @@ export class UniqueArray extends Array {
 
   /**
    * @param {string} uniqueParam
-   * @returns {T}
+   * @returns {?T}
    */
   findByUniqueProp(uniqueParam) {
     return this.find(x => this._getUniqueProp(x) === uniqueParam)

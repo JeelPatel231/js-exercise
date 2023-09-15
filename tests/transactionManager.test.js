@@ -6,7 +6,7 @@ import { BookManager } from "../book.js"
 import { UserManager } from "../user.js"
 import { InvalidOperationError } from "../errors.js"
 
-describe(`User Manager`, () => {
+describe(`Transaction Manager`, () => {
 
   let tranxManager = null
 

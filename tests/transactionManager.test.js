@@ -26,6 +26,10 @@ describe(`User Manager`, () => {
     tranxManager = new TransactionManager(crypto, bookManager, userManager)
   })
 
+  afterEach(() => {
+    MockDate.reset()
+  })
+
   it(`Checking Out makes an entry`, () => {
     tranxManager.checkOutBook(book1.isbn, user1.uuid)
     assert.equal(tranxManager.length, 1)
@@ -111,14 +115,35 @@ describe(`User Manager`, () => {
   })
 
   it(`Due Date of Book must be correctly set`, () => {
+    MockDate.set(0); // checked out in jan 1, 1970
     tranxManager.checkOutBook(book1.isbn, user1.uuid)
-    assert.equal(
-      tranxManager.getDueDateOfBook(book1.isbn).getTime(),
-      Date.now() + (TransactionManager.MAX_DUE_DAYS * 24 * 60 * 60 * 1000)
+    // checkout date is set to current system time
+    assert.deepEqual(
+      tranxManager.find(x => x.bookId === book1.isbn).date,
+      new Date(0)
+    )
+    // due date is after a specific time interval
+    assert.deepEqual(
+      tranxManager.getDueDateOfBook(book1.isbn),
+      new Date(TransactionManager.MAX_DUE_INTERVAL_SECONDS * 1000)
     )
     tranxManager.returnBook(book1.isbn, user1.uuid)
+    // date resets to null
+    assert.deepEqual(
+      tranxManager.getDueDateOfBook(book1.isbn),
+      null
+    )
   })
 
-  // TODO : mock time to check for due dates
+  it(`Book goes overDue after specific time interval`, () => {
+    MockDate.set(0); // checked out in jan 1, 1970
+    tranxManager.checkOutBook(book1.isbn, user1.uuid)
+    assert.equal(tranxManager.isBookOverDue(book1.isbn), false)
+    MockDate.set((TransactionManager.MAX_DUE_INTERVAL_SECONDS * 1000) + 1); // jan 8, 1970
+    assert.equal(tranxManager.isBookOverDue(book1.isbn), true)
+
+    const specificTransaction = tranxManager.find(x => x.bookId === book1.isbn)
+    console.log(tranxManager.getOverDueBooks(), [specificTransaction])
+  })
 })
 

@@ -55,6 +55,11 @@ export class TransactionManager extends UniqueArray {
   static get MAX_DUE_DAYS() {
     return 7
   }
+
+  static get MAX_DUE_INTERVAL_SECONDS() {
+    return TransactionManager.MAX_DUE_DAYS * 24 * 60 * 60
+  }
+
   static get MAX_CHECKOUTS() {
     return 3
   }
@@ -153,10 +158,26 @@ export class TransactionManager extends UniqueArray {
    */
   getDueDateOfBook(isbn) {
     const lastTranxOfBook = this.filter(x => x.bookId === isbn).pop();
-    if (lastTranxOfBook.transactionType !== TransactionTypes.CHECKOUT) {
+    if (lastTranxOfBook?.transactionType !== TransactionTypes.CHECKOUT) {
       return null
     }
-    return new Date(Date.now() + (TransactionManager.MAX_DUE_DAYS * 24 * 60 * 60 * 1000))
+    return new Date(lastTranxOfBook.date.getTime() + (TransactionManager.MAX_DUE_INTERVAL_SECONDS * 1000))
+  }
+
+  /**
+   * @param {ISBN} isbn 
+   * @returns {boolean}
+   */
+  isBookOverDue(isbn) {
+    const dueDateOfBook = this.getDueDateOfBook(isbn)
+    if (dueDateOfBook == null) { return false }
+
+    return dueDateOfBook < new Date()
+  }
+
+  /** @returns {Transaction[]} */
+  getOverDueBooks() {
+    return [...this.filter(x => this.isBookOverDue(x.bookId))];
   }
 
 }

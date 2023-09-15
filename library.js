@@ -1,7 +1,7 @@
 import { BookManager } from "./book.js"
 import { CryptoProvider } from "./cryptoprovider.js";
 import { ReviewManager } from "./review.js";
-import { AbstractStorage, WebStorage } from "./storage.js";
+import { AbstractStorage } from "./storage.js";
 import { TransactionManager } from "./transaction.js";
 import { UserManager } from "./user.js"
 
@@ -11,7 +11,7 @@ import { UserManager } from "./user.js"
  * @callback StorageProviderCallback
  * @param {Library} library 
  * @returns {AbstractStorage}
- * */ 
+ * */
 
 export class Library {
 
@@ -22,10 +22,10 @@ export class Library {
   constructor(storage, crypto) {
     /** @private @type {CryptoProvider} */
     this._cryptoObject = crypto;
-   
+
     /** @type {BookManager} */
     this.books = new BookManager();
-    
+
     /** @type {UserManager} */
     this.users = new UserManager(this._cryptoObject);
 
@@ -37,7 +37,7 @@ export class Library {
 
     /** @type {ReviewManager} */
     this.reviews = new ReviewManager(this.books, this.users);
-  
+
   }
 }
 

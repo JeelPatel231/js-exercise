@@ -1,8 +1,4 @@
 import { AbstractStorage } from "../storage.js"
-import { BookManager } from "../book.js"
-import { TransactionManager } from "../transaction.js"
-import { ReviewManager } from "../review.js"
-import { UserManager } from "../user.js"
 import * as fs from "node:fs"
 
 /**
@@ -21,17 +17,12 @@ export class NodeStorage extends AbstractStorage {
   }
 
   load() {
-    // TODO : bugfix : functions in class dont work after loading
     const stringLib = fs.readFileSync("lib.json", "utf-8")
-    // handle json decoding errors
+    // TODO : handle json decoding errors
     const decoded = JSON.parse(stringLib)
-    //@ts-ignore
-    this._library.books = BookManager.from(decoded.books)
-    //@ts-ignore
-    this._library.users = UserManager.from(decoded.users)
-    //@ts-ignore
-    this._library.reviews = ReviewManager.from(decoded.reviews)
-    //@ts-ignore
-    this._library.tranx = TransactionManager.from(decoded.transactions)
+    this._library.books.push(...decoded.books)
+    this._library.users.push(...decoded.users)
+    this._library.reviews.push(...decoded.reviews)
+    this._library.tranx.push(...decoded.transactions)
   }
 }

@@ -1,9 +1,5 @@
-import { BookManager } from "./book.js";
 import { NotFoundError, NotImplementedError } from "./errors.js";
 import { Library } from "./library.js";
-import { ReviewManager } from "./review.js";
-import { TransactionManager } from "./transaction.js";
-import { UserManager } from "./user.js";
 
 export class AbstractStorage {
   /** @param {Library} library */
@@ -44,16 +40,12 @@ export class WebStorage extends AbstractStorage {
     if (stringLib == null) {
       throw new NotFoundError("Library")
     }
-    // handle json decoding errors
+    // TODO : handle json decoding errors
     const decoded = JSON.parse(stringLib)
-    // @ts-ignore
-    this._library.books = BookManager.from(decoded.books)
-    // @ts-ignore
-    this._library.users = UserManager.from(decoded.users)
-    // @ts-ignore
-    this._library.reviews = ReviewManager.from(decoded.reviews)
-    // @ts-ignore
-    this._library.tranx = TransactionManager.from(decoded.transactions)
+    this._library.books.push(...decoded.books)
+    this._library.users.push(...decoded.users)
+    this._library.reviews.push(...decoded.reviews)
+    this._library.tranx.push(...decoded.transactions)
   }
 }
 
